@@ -49,6 +49,13 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    var data = await fetchStudents();
+    print(data);
+  }
+
+  @override
   void dispose() {
     super.dispose();
     animationController.dispose();
@@ -60,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+
     var width = size.width;
     var height = size.height;
     var radius = min(width, height);
@@ -113,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Card(
                     child: ListTile(
                       leading: CircleAvatar(
+                        //backgroundColor: Colors.pink,
                         backgroundColor: Color.fromARGB(
                           256,
                           random.nextInt(256),
@@ -312,27 +321,43 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                         TextButton(
-                          onPressed: () {
-                            setState(() {
-                              insertStudent(
-                                Student(
-                                  rollNo: int.parse(
-                                    rollNoController.text.toString(),
+                          onPressed: () async {
+                            setState(
+                              () async {
+                                await insertStudent(
+                                  Student(
+                                    rollNo: int.parse(
+                                      rollNoController.text.toString(),
+                                    ),
+                                    fee: double.parse(
+                                      feeController.text.toString(),
+                                    ),
+                                    name: nameController.text.toString(),
                                   ),
-                                  fee: double.parse(
-                                    feeController.text.toString(),
-                                  ),
-                                  name: nameController.text.toString(),
-                                ),
-                              ).then((value) {
-                                print('Data has been Added');
-                              }).onError((error, stackTrace) {
-                                print(error.toString());
-                                print('Something went wrong');
-                              });
-                              ;
-                            });
-                            // Navigator.of(context).pop();
+                                ).then((value) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Data has been added',
+                                      ),
+                                    ),
+                                  );
+                                  Navigator.of(context).pop();
+                                }).onError(
+                                  (error, stackTrace) {
+                                    debugPrint(error.toString());
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Something went wrong',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            );
                           },
                           child: FittedBox(
                             child: Text(
